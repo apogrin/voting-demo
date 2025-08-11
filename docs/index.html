@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Voting DApp (Demo)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; max-width: 880px }
+    header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 16px }
+    button { padding:8px 14px; border:1px solid #ccc; border-radius:10px; cursor:pointer; background:#fff }
+    button[disabled]{ opacity:.5; cursor:not-allowed }
+    .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; margin:14px 0; box-shadow: 0 1px 4px rgba(0,0,0,.04) }
+    .row { display:flex; gap:10px; flex-wrap:wrap }
+    .muted { color:#6b7280; font-size:14px }
+    .tag { display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #e5e7eb; font-size:12px; margin-left:6px }
+    input, textarea { width:100%; padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px }
+    ul { padding-left: 18px }
+    .option { display:flex; align-items:center; gap:10px; margin:6px 0 }
+    .pill { font-variant-numeric: tabular-nums; background:#f9fafb; border:1px solid #e5e7eb; padding:2px 8px; border-radius:999px; }
+    a { color:#2563eb; text-decoration: none }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <strong>Voting DApp</strong>
+      <span class="tag" id="networkTag">Not connected</span>
+      <span class="tag" id="addrTag">—</span>
+    </div>
+    <div class="row">
+      <button id="connectBtn">Connect Wallet</button>
+      <button id="switchBtn" style="display:none">Switch to Sepolia</button>
+    </div>
+  </header>
+
+  <section class="card" id="createPollCard" style="display:none">
+    <h3>Create a Poll</h3>
+    <p class="muted">Only the instructor (contract owner) sees this.</p>
+    <label>Question</label>
+    <textarea id="question" rows="2" placeholder="e.g., What should our team lunch be?"></textarea>
+    <div id="optionsWrap">
+      <div class="option"><input placeholder="Option 1" /></div>
+      <div class="option"><input placeholder="Option 2" /></div>
+      <div class="option"><input placeholder="Option 3 (optional)" /></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="addOptBtn">+ Add option</button>
+      <button id="createBtn">Create poll</button>
+    </div>
+    <div class="muted" id="createStatus"></div>
+  </section>
+
+  <section class="card">
+    <h3>Polls</h3>
+    <div id="polls"></div>
+  </section>
+
+  <section class="card">
+    <h3>How it works</h3>
+    <ul>
+      <li>Connect your MetaMask on <strong>Sepolia</strong>.</li>
+      <li>Pick a poll → choose an option → confirm the transaction.</li>
+      <li>Each vote is an on-chain transaction (with gas on mainnet; free test ETH here).</li>
+    </ul>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
