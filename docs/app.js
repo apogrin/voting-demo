@@ -1,5 +1,5 @@
 // ======= SET THESE =======
-const CONTRACT_ADDRESS = "0xYOUR_DEPLOYED_CONTRACT"; // <— paste your Sepolia address
+const CONTRACT_ADDRESS = "0x9d4F7bEEDa7E9661263B570e6497d4F7BaB8d02Bab3AEb4848454EFEc7A20e86"; // <— paste your Sepolia address
 const SEPOLIA = {
   chainId: "0xaa36a7", // 11155111 in hex
   chainName: "Sepolia",
