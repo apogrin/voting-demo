@@ -17,8 +17,11 @@
     ul { padding-left: 18px }
     .option { display:flex; align-items:center; gap:10px; margin:6px 0 }
     .pill { font-variant-numeric: tabular-nums; background:#f9fafb; border:1px solid #e5e7eb; padding:2px 8px; border-radius:999px; }
+    .activity { margin-top:10px; border-top:1px dashed #e5e7eb; padding-top:10px }
+    .activity a { text-decoration: none; }
     a { color:#2563eb; text-decoration: none }
     noscript { display:block; margin:12px 0; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff7ed; }
+    .iconbtn { padding:4px 10px; border-radius:999px; }
   </style>
 </head>
 <body>
@@ -40,14 +43,13 @@
     <h3>Create a Poll</h3>
     <p class="muted">Only the instructor (contract owner) sees this.</p>
     <label>Question</label>
-    <textarea id="question" rows="2" placeholder="e.g., What should our team lunch be?"></textarea>
-    <div id="optionsWrap">
-      <div class="option"><input placeholder="Option 1" /></div>
-      <div class="option"><input placeholder="Option 2" /></div>
-      <div class="option"><input placeholder="Option 3 (optional)" /></div>
-    </div>
+    <textarea id="question" rows="2" placeholder="What’s your favourite cryptocurrency?"></textarea>
+
+    <div id="optionsWrap"></div>
+
     <div class="row" style="margin-top:8px">
       <button id="addOptBtn">+ Add option</button>
+      <button id="resetBtn" class="iconbtn">⟲ Reset form</button>
       <button id="createBtn">Create poll</button>
     </div>
     <div class="muted" id="createStatus"></div>
@@ -70,6 +72,6 @@
   <!-- Reliable ethers v6 UMD build -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js" defer></script>
   <!-- Cache-bust app.js so Pages/CDN updates are picked up -->
-  <script src="./app.js?v=4" defer></script>
+  <script src="./app.js?v=6" defer></script>
 </body>
 </html>
