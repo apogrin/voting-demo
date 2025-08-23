@@ -1,7 +1,7 @@
 // ======= SET THESE =======
 // NOTE: This MUST be a 42-character Ethereum address: 0x + 40 hex chars.
 // If you paste a 66-char tx hash (0x + 64 hex), the app will not work.
-const CONTRACT_ADDRESS = "0xdec49157520833c912f4e5a05a1c424a03223f13a4f950229a1b091a3a202641"; // e.g., 0xAbC...123
+const CONTRACT_ADDRESS = "0xb7f2754297f9da369029adb875510dba55dea0b4"; // e.g., 0xAbC...123
 const SEPOLIA = {
   chainId: "0xaa36a7", // 11155111 in hex
   chainName: "Sepolia",
