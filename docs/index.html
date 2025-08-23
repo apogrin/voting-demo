@@ -18,6 +18,7 @@
     .option { display:flex; align-items:center; gap:10px; margin:6px 0 }
     .pill { font-variant-numeric: tabular-nums; background:#f9fafb; border:1px solid #e5e7eb; padding:2px 8px; border-radius:999px; }
     a { color:#2563eb; text-decoration: none }
+    noscript { display:block; margin:12px 0; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; background:#fff7ed; }
   </style>
 </head>
 <body>
@@ -32,6 +33,8 @@
       <button id="switchBtn" style="display:none">Switch to Sepolia</button>
     </div>
   </header>
+
+  <noscript>JavaScript is disabled — enable it to use the DApp.</noscript>
 
   <section class="card" id="createPollCard" style="display:none">
     <h3>Create a Poll</h3>
@@ -64,7 +67,9 @@
     </ul>
   </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.min.js"></script>
-  <script src="./app.js"></script>
+  <!-- Reliable ethers v6 UMD build -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js" defer></script>
+  <!-- Cache-bust app.js so Pages/CDN updates are picked up -->
+  <script src="./app.js?v=4" defer></script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 // ======= SET THESE =======
-const CONTRACT_ADDRESS = "0x9d4F7bEEDa7E9661263B570e6497d4F7BaB8d02Bab3AEb4848454EFEc7A20e86"; // <— paste your Sepolia address
+// NOTE: This MUST be a 42-character Ethereum address: 0x + 40 hex chars.
+// If you paste a 66-char tx hash (0x + 64 hex), the app will not work.
+const CONTRACT_ADDRESS = "0xdec49157520833c912f4e5a05a1c424a03223f13a4f950229a1b091a3a202641"; // e.g., 0xAbC...123
 const SEPOLIA = {
   chainId: "0xaa36a7", // 11155111 in hex
   chainName: "Sepolia",
@@ -11,9 +13,33 @@ const SEPOLIA = {
 
 let provider, signer, contract, userAddr, ownerAddr, chainIdHex;
 
+function log(...args) { console.log("[Voting]", ...args); }
+function err(...args) { console.error("[Voting]", ...args); }
+
+function short(addr) {
+  return addr ? addr.slice(0, 6) + "…" + addr.slice(-4) : "—";
+}
+
+// Basic address sanity check (ethers v6 has ethers.isAddress)
+function isValidAddress(a) {
+  try { return (window.ethers && window.ethers.isAddress) ? window.ethers.isAddress(a) : /^0x[a-fA-F0-9]{40}$/.test(a); }
+  catch { return false; }
+}
+
+// UI helpers
+function setStatusTag(text) {
+  const tag = document.getElementById("networkTag");
+  if (tag) tag.textContent = text;
+}
+function setAddrTag(text) {
+  const tag = document.getElementById("addrTag");
+  if (tag) tag.textContent = text;
+}
+
 // Load ABI from local file
 async function loadAbi() {
-  const res = await fetch("./abi.json");
+  const res = await fetch("./abi.json", { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to fetch abi.json: ${res.status}`);
   const abi = await res.json();
   if (!Array.isArray(abi) || abi.length === 0) {
     throw new Error("abi.json is empty. Paste your contract ABI into /docs/abi.json");
@@ -21,20 +47,12 @@ async function loadAbi() {
   return abi;
 }
 
-function short(addr) {
-  return addr ? addr.slice(0, 6) + "…" + addr.slice(-4) : "—";
-}
-
 async function ensureSepolia() {
   const current = await window.ethereum.request({ method: "eth_chainId" });
   chainIdHex = current;
-  if (current !== SEPOLIA.chainId) {
-    document.getElementById("switchBtn").style.display = "inline-block";
-    return false;
-  } else {
-    document.getElementById("switchBtn").style.display = "none";
-    return true;
-  }
+  const ok = current === SEPOLIA.chainId;
+  document.getElementById("switchBtn").style.display = ok ? "none" : "inline-block";
+  return ok;
 }
 
 async function switchToSepolia() {
@@ -43,57 +61,76 @@ async function switchToSepolia() {
       method: "wallet_switchEthereumChain",
       params: [{ chainId: SEPOLIA.chainId }]
     });
-  } catch (err) {
-    if (err.code === 4902) {
-      await window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [SEPOLIA]
-      });
+  } catch (e) {
+    if (e.code === 4902) {
+      await window.ethereum.request({ method: "wallet_addEthereumChain", params: [SEPOLIA] });
     } else {
-      throw err;
+      throw e;
     }
   }
 }
 
 async function connect() {
+  log("connect() start");
+
+  // MetaMask presence
   if (!window.ethereum) {
-    alert("MetaMask not found. Please install it.");
+    alert("No Ethereum wallet found.\nInstall MetaMask in Chrome/Brave/Edge/Firefox, or open in MetaMask mobile browser.");
     return;
   }
+
+  // Validate contract address early to avoid confusing errors later
+  if (!isValidAddress(CONTRACT_ADDRESS)) {
+    setAddrTag("invalid address");
+    setStatusTag("⚠️ bad CONTRACT_ADDRESS");
+    err("Invalid CONTRACT_ADDRESS. Make sure it is a 42-char address, not a tx hash.");
+    return;
+  }
+
+  // Request accounts
   await window.ethereum.request({ method: "eth_requestAccounts" });
   provider = new ethers.BrowserProvider(window.ethereum);
   signer = await provider.getSigner();
   userAddr = await signer.getAddress();
+  setAddrTag(short(userAddr));
+  log("accounts granted:", userAddr);
 
+  // Ensure network
+  const networkOk = await ensureSepolia();
+  setStatusTag(networkOk ? "Sepolia" : "Wrong network");
+
+  // Init contract
   const abi = await loadAbi();
   contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
 
-  const networkOk = await ensureSepolia();
-  const netTag = document.getElementById("networkTag");
-  netTag.textContent = networkOk ? "Sepolia" : "Wrong network";
-  document.getElementById("addrTag").textContent = short(userAddr);
-
   try {
     ownerAddr = await contract.owner();
-  } catch {
+    log("owner()", ownerAddr);
+  } catch (e) {
+    // If your contract doesn't have owner(), this will fail—hide the create form in that case
     ownerAddr = null;
+    log("owner() not available on this ABI (Create Poll will be hidden)");
   }
+
   document.getElementById("createPollCard").style.display =
-    ownerAddr && ownerAddr.toLowerCase() === userAddr.toLowerCase()
-      ? "block"
-      : "none";
+    ownerAddr && ownerAddr.toLowerCase() === userAddr.toLowerCase() ? "block" : "none";
 
   await renderPolls();
 
-  window.ethereum.on("accountsChanged", () => location.reload());
-  window.ethereum.on("chainChanged", () => location.reload());
+  // React to changes
+  window.ethereum.removeAllListeners?.("accountsChanged");
+  window.ethereum.removeAllListeners?.("chainChanged");
+  window.ethereum.on("accountsChanged", () => { location.reload(); });
+  window.ethereum.on("chainChanged", () => { location.reload(); });
 }
 
 async function renderPolls() {
+  log("renderPolls() start");
   const container = document.getElementById("polls");
   container.innerHTML = "Loading polls…";
   try {
     const count = Number(await contract.getPollCount());
+    log("poll count =", count);
     if (count === 0) {
       container.innerHTML = "<div class='muted'>No polls yet.</div>";
       return;
@@ -107,7 +144,8 @@ async function renderPolls() {
     container.innerHTML = "";
     items.forEach(el => container.appendChild(el));
   } catch (e) {
-    container.innerHTML = `<div class="muted">Error loading polls: ${e?.message || e}</div>`;
+    err("renderPolls error", e);
+    container.innerHTML = `<div class="muted">Error loading polls: ${e?.shortMessage || e?.message || e}</div>`;
   }
 }
 
@@ -158,11 +196,13 @@ async function castVote(pollId, optionIdx) {
   try {
     s.textContent = "Sending transaction…";
     const tx = await contract.vote(pollId, optionIdx);
+    log("vote tx", tx.hash);
     s.innerHTML = `Tx sent: <a target="_blank" href="https://sepolia.etherscan.io/tx/${tx.hash}">${tx.hash}</a> (waiting…)`;
     await tx.wait();
     s.innerHTML += " ✓ confirmed";
     await renderPolls();
   } catch (e) {
+    err("castVote error", e);
     s.textContent = "Error: " + (e?.shortMessage || e?.message || e);
   }
 }
@@ -188,6 +228,7 @@ document.getElementById("createBtn").addEventListener("click", async () => {
   try {
     status.textContent = "Creating poll…";
     const tx = await contract.createPoll(q, opts);
+    log("createPoll tx", tx.hash);
     status.innerHTML = `Tx sent: <a target="_blank" href="https://sepolia.etherscan.io/tx/${tx.hash}">${tx.hash}</a> (waiting…)`;
     await tx.wait();
     status.innerHTML += " ✓ created";
@@ -195,16 +236,36 @@ document.getElementById("createBtn").addEventListener("click", async () => {
     inputs.forEach(i => (i.value = ""));
     await renderPolls();
   } catch (e) {
+    err("createPoll error", e);
     status.textContent = "Error: " + (e?.shortMessage || e?.message || e);
   }
 });
 
 // ---------- Top bar buttons ----------
-document.getElementById("connectBtn").addEventListener("click", connect);
+document.getElementById("connectBtn").addEventListener("click", () => {
+  log("connect button clicked");
+  connect();
+});
 document.getElementById("switchBtn").addEventListener("click", async () => {
   await switchToSepolia();
   await connect();
 });
 
-// On load: show contract addr
-document.getElementById("addrTag").textContent = short(CONTRACT_ADDRESS);
+// On load: show something so you know JS is running; auto-connect if already authorized
+setAddrTag("script-ok");
+log("app.js loaded");
+
+if (window.ethereum) {
+  window.ethereum.request({ method: "eth_accounts" })
+    .then(accts => {
+      if (accts && accts.length) {
+        log("already authorized:", accts[0]);
+        connect(); // silent connect
+      } else {
+        log("not yet authorized");
+      }
+    })
+    .catch(e => err("eth_accounts error", e));
+} else {
+  log("window.ethereum missing (install MetaMask)");
+}
