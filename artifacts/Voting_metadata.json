@@ -16,6 +16,32 @@
 					{
 						"indexed": true,
 						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "InstructorAdded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "InstructorRemoved",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
 						"name": "previousOwner",
 						"type": "address"
 					},
@@ -91,6 +117,19 @@
 				],
 				"name": "VoteCast",
 				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "addInstructor",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
 			},
 			{
 				"inputs": [
@@ -220,6 +259,25 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "isInstructor",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "owner",
 				"outputs": [
@@ -230,6 +288,19 @@
 					}
 				],
 				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "removeInstructor",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -265,39 +336,14 @@
 			}
 		],
 		"devdoc": {
-			"details": "No external dependencies; designed for easy use in Remix + testnets.",
 			"kind": "dev",
-			"methods": {
-				"getPoll(uint256)": {
-					"details": "Returns copies of dynamic arrays for easy front-end consumption."
-				}
-			},
-			"title": "Simple On-Chain Voting (Classroom Demo)",
+			"methods": {},
+			"title": "Simple On-Chain Voting (Classroom Demo, multi-instructor)",
 			"version": 1
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {
-				"closePoll(uint256)": {
-					"notice": "Close a poll to prevent further voting (results remain readable)."
-				},
-				"createPoll(string,string[])": {
-					"notice": "Create a new poll with a question and 2–10 options."
-				},
-				"getOptionCount(uint256)": {
-					"notice": "Number of options in a poll (handy for UI bounds)."
-				},
-				"getPoll(uint256)": {
-					"notice": "Read poll metadata and current tallies."
-				},
-				"hasVoted(uint256,address)": {
-					"notice": "Check if an address has voted in a given poll."
-				},
-				"vote(uint256,uint256)": {
-					"notice": "Cast a vote for a given option on an open poll."
-				}
-			},
-			"notice": "Instructor (contract owner) can create multiple-choice polls; each address can vote once per poll.",
+			"methods": {},
 			"version": 1
 		}
 	},
@@ -318,11 +364,11 @@
 	},
 	"sources": {
 		"contracts/voting.sol": {
-			"keccak256": "0x51d43092a31043b9aa01037ed9099e018455cd40c0051b8f4c006f736e68b87d",
+			"keccak256": "0x70e7b469cb5233343bdb10ba7439d464a8f74fd8bb3b2855ebb103810749a47e",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://852f160c6761df531be99b81b338e44b38e95029bcbb9ed6fa74e47bd449a163",
-				"dweb:/ipfs/QmeRB9X6obSB7JG5h5BngSmQ8UDyFy2czeeyZZ6aafdzvQ"
+				"bzz-raw://c6811a4c4907671ac42fece15949ff26ed39397f0b896e33b95d306fa3000d0c",
+				"dweb:/ipfs/QmdczhfT8UFTa5vyNVEsJVeefwvCEkX9DHi4pJMUibuoJ4"
 			]
 		}
 	},
